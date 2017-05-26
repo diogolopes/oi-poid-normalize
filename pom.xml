@@ -1,0 +1,75 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>br.com.oiinternet</groupId>
+    <artifactId>oi-poid-normalizer</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>Poid normalizer tool</name>
+    <description>Normalize oi-api poid to remove version</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.3.RELEASE</version>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+
+        <dependency>
+            <artifactId>oi-commons-brm</artifactId>
+            <groupId>br.com.oi.oicommons</groupId>
+            <version>${oi.commons.version}</version>
+        </dependency>
+
+        <dependency>
+            <artifactId>oi-api-sdk</artifactId>
+            <groupId>br.com.oiinternet.oiapi</groupId>
+            <version>${oi.api.version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>local</id>
+            <properties>
+                <mongodb.uri>mongodb://projeto-docker:7000/api</mongodb.uri>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <mongodb.uri>mongodb://mongodb-1.oi.infra:27017,mongodb-2.oi.infra:27017,mongodb-3.oi.infra:27017/api</mongodb.uri>
+            </properties>
+        </profile>
+    </profiles>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+
+        <oi.api.version>1.5.5-SNAPSHOT</oi.api.version>
+        <oi.commons.version>2.2.1-SNAPSHOT</oi.commons.version>
+
+
+    </properties>
+
+
+</project>
