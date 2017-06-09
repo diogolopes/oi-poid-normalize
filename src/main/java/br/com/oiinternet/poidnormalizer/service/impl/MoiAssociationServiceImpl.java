@@ -6,11 +6,8 @@ import static org.springframework.util.StringUtils.isEmpty;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
@@ -33,7 +30,7 @@ public class MoiAssociationServiceImpl implements MoiAssociationService {
     private static final String POID_SEPARATOR = " ";
     private static final String TVOD_EMAIL = "user@tvod.oi.br";
 
-    private static final int MAX_PER_PAGE = 100;
+    private static final int MAX_PER_PAGE = 1000;
 
     private AtomicInteger amount = new AtomicInteger(0);
 
@@ -50,17 +47,12 @@ public class MoiAssociationServiceImpl implements MoiAssociationService {
         int totalOfPages = Long.valueOf((total / MAX_PER_PAGE) + 1).intValue();
 
         for (int i = 0; i < totalOfPages; i++) {
+            LOGGER.info("Page {} of {}", i, totalOfPages);
+
             final Page<MoiAssociation> pageResult = moiAssociationRepository.findAll(new PageRequest(i, MAX_PER_PAGE));
 
-            // substituir pela query de aggregate o resultado ja com count > 1
-            final Map<String, Long> counting = pageResult.getContent().stream()
-                    .collect(Collectors.groupingBy(MoiAssociation::getCpfCnpj, Collectors.counting()));
-
-            final Set<String> duplicatedCpfCnpj = counting.entrySet().stream()
-                    .flatMap(entry -> Stream.of(entry.getKey())).collect(Collectors.toSet());
-
-            duplicatedCpfCnpj.forEach(cpfCnpj -> fixMoiAssociationStatus(cpfCnpj));
-
+            pageResult.getContent().stream().map(MoiAssociation::getCpfCnpj).collect(Collectors.toSet())
+                    .forEach(cpf -> fixMoiAssociationStatus(cpf));
         }
 
         return amount;
