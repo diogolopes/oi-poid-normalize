@@ -28,6 +28,7 @@ hs_err_pid*
 .textmate
 *.sublime-*
 nbactions.xml
+.log
 
 # Maven
 pom.xml.releaseBackup

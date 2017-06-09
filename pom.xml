@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>br.com.oiinternet</groupId>
     <artifactId>oi-poid-normalizer</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
     <name>Poid normalizer tool</name>
     <description>Normalize oi-api poid to remove version</description>
 
@@ -70,7 +70,6 @@
 
         <oi.api.version>1.5.5</oi.api.version>
         <oi.commons.version>2.2.1-SNAPSHOT</oi.commons.version>
-
 
     </properties>
 

@@ -5,7 +5,9 @@ import static br.com.oi.oicommons.brm.util.BRMUtils.removeVersion;
 import static org.springframework.util.StringUtils.isEmpty;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -32,7 +34,8 @@ public class MoiAssociationServiceImpl implements MoiAssociationService {
 
     private static final int MAX_PER_PAGE = 1000;
 
-    private AtomicInteger amount = new AtomicInteger(0);
+    private final AtomicInteger statusEmptyAmount = new AtomicInteger(0);
+    private final Set<String> updatedCnpj = new HashSet<>();
 
     private final MoiAssociationRepository moiAssociationRepository;
 
@@ -41,7 +44,7 @@ public class MoiAssociationServiceImpl implements MoiAssociationService {
     }
 
     @Override
-    public AtomicInteger findDuplicatedMoiAssociation() {
+    public int findDuplicatedMoiAssociation() {
 
         long total = moiAssociationRepository.count();
         int totalOfPages = Long.valueOf((total / MAX_PER_PAGE) + 1).intValue();
@@ -55,7 +58,13 @@ public class MoiAssociationServiceImpl implements MoiAssociationService {
                     .forEach(cpf -> fixMoiAssociationStatus(cpf));
         }
 
-        return amount;
+        final List<MoiAssociation> moiAssociationWithoutStatus = moiAssociationRepository.findByStatusIsNull();
+        final int statusEmptySize = moiAssociationWithoutStatus.size();
+        LOGGER.info("Found {} with null status", statusEmptySize);
+        moiAssociationWithoutStatus.forEach(moiAssociation -> setActiveStatusMoiAssociationStatus(moiAssociation));
+        LOGGER.info("Updated {} of {} with null status", statusEmptyAmount.get(), statusEmptySize);
+
+        return updatedCnpj.size();
     }
 
     @Override
@@ -83,13 +92,25 @@ public class MoiAssociationServiceImpl implements MoiAssociationService {
         }
     }
 
+    private void setActiveStatusMoiAssociationStatus(final MoiAssociation moiAssociation) {
+        if (moiAssociation.getStatus() == null) {
+            statusEmptyAmount.incrementAndGet();
+            moiAssociation.setStatus(Status.ACTIVE);
+            moiAssociationRepository.save(moiAssociation);
+            LOGGER.info("MoiAssociation with null status. Change to ACTIVE for cpfCnpj {}, poid {}",
+                    moiAssociation.getCpfCnpj(), moiAssociation.getAccountPoid());
+        }
+    }
+
     private void fixMoiAssociationStatus(final String cpfCnpj) {
         final List<MoiAssociation> moiAssociationList = moiAssociationRepository.findByCpfCnpj(cpfCnpj);
-        if (CollectionUtils.isEmpty(moiAssociationList) || moiAssociationList.size() < 2) {
+
+        if (CollectionUtils.isEmpty(moiAssociationList) || moiAssociationList.size() < 2
+                || updatedCnpj.contains(cpfCnpj)) {
             return;
         }
 
-        amount.incrementAndGet();
+        updatedCnpj.add(cpfCnpj);
 
         Date currentAssociationDate = null;
         int activeStatusCount = 0;
@@ -118,6 +139,7 @@ public class MoiAssociationServiceImpl implements MoiAssociationService {
                     moiAssociationRepository.save(moiAssociation);
                     LOGGER.info("Already has an ACTIVE status. Set stastus to INACTIVE for cpfCnpj {}, poid {}",
                             moiAssociation.getCpfCnpj(), moiAssociation.getAccountPoid());
+
                 } else {
                     LOGGER.info("Already has an status defined. Nothing to do for cpfCnpj {}, poid {}",
                             moiAssociation.getCpfCnpj(), moiAssociation.getAccountPoid());

@@ -13,6 +13,8 @@ public interface MoiAssociationRepository extends MongoRepository<MoiAssociation
 
     List<MoiAssociation> findByCpfCnpj(final String cpfCnpj);
 
+    List<MoiAssociation> findByStatusIsNull();
+
     // @Query(value = "db.moiAssociation.aggregate( [ { $group: { _id: { cpfCnpj: “$cpfCnpj”}, count: { $sum: 1 } } }, {
     // $match: { count: { $gt: 1 } } }, { $count : “cpfCnpj” }] )")
     // List<Object[]> findDuplicatedMoiAssociation();
