@@ -48,6 +48,9 @@
     <profiles>
         <profile>
             <id>local</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <properties>
                 <mongodb.uri>mongodb://projeto-docker:7000/api</mongodb.uri>
             </properties>
@@ -65,7 +68,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
 
-        <oi.api.version>1.5.5-SNAPSHOT</oi.api.version>
+        <oi.api.version>1.5.5</oi.api.version>
         <oi.commons.version>2.2.1-SNAPSHOT</oi.commons.version>
 
 
